@@ -1,0 +1,424 @@
+<html>
+<head>
+    <base href="/" />
+    <meta charset="UTF-8">
+    <title>Sistema de Gestão Completo</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+      /* --- Estilos Globais --- */
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transition: background 0.5s ease;
+      }
+      /* CORREÇÃO: Fundo da App será o mesmo gradiente */
+      body.app-mode {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+      }
+
+      /* --- Estilos das Telas de Login --- */
+      .login-wrapper {
+        display: flex; /* Começa visível */
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-height: 100vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: opacity 0.5s ease;
+      }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+      .container { background: #ffffff; padding: 40px 50px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); width: 100%; max-width: 420px; text-align: center; animation: fadeIn 0.6s ease-out; }
+      h1 { font-size: 28px; font-weight: 600; color: #333; margin-bottom: 8px; text-align: left; }
+      .subtitle { font-size: 15px; color: #888; margin-bottom: 30px; text-align: left; }
+      .input-wrapper { position: relative; margin-bottom: 20px; }
+      .input-wrapper .icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 16px; }
+      input { width: 100%; padding: 14px 20px 14px 50px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: 'Poppins', sans-serif; transition: all 0.3s ease; background-color: #f9f9f9; }
+      input:focus { outline: none; border-color: #667eea; background-color: #fff; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2); }
+      .input-wrapper .eye-icon { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #aaa; }
+      button { width: 100%; padding: 15px; border: none; border-radius: 10px; background: linear-gradient(90deg, #667eea, #764ba2); color: white; font-size: 16px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; margin-top: 15px; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; }
+      button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); }
+      .links { margin-top: 25px; font-size: 14px; }
+      .links a { color: #667eea; text-decoration: none; margin: 0 8px; font-weight: 500; }
+      .password-requirements { text-align: left; font-size: 13px; color: #888; margin: -10px 0 20px 10px; }
+      .password-requirements ul { list-style: none; padding-left: 0; }
+      .password-requirements li { margin: 5px 0; transition: all 0.3s ease; }
+      .password-requirements li::before { display: inline-block; width: 20px; text-align: center; margin-left: -20px; }
+      .password-requirements li.invalid::before { content: '✗'; color: #dc3545; }
+      .password-requirements li.valid::before { content: '✓'; color: #28a745; }
+      .password-requirements li.valid { color: #28a745; font-weight: 500; }
+      .password-requirements li.invalid { color: #dc3545; }
+      .error-message { color: #dc3545; font-size: 12px; text-align: left; margin: -15px 0 15px 5px; display: none; }
+
+      /* --- ESTILOS DA NOVA TELA DE GESTÃO DE PRODUTOS --- */
+      #productManagementPage { width: 100%; min-height: 100vh; display: none; padding: 20px; }
+      .app-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        overflow: hidden;
+      }
+      .app-header { background-color: #ffffff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; }
+      .app-header h1 { font-size: 24px; margin: 0; color: #667eea; }
+      #logoutBtn { background: #f44336; color: white; padding: 8px 15px; border-radius: 8px; font-weight: 500; font-size: 14px; width: auto; margin: 0; box-shadow: none; }
+      #logoutBtn:hover { background: #d32f2f; transform: none; }
+      .app-main { padding: 30px; }
+      .toolbar { display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+      #addProductBtn { width: auto; padding: 12px 20px; font-size: 15px; margin: 0; }
+      .search-wrapper { position: relative; width: 100%; max-width: 350px; }
+      .search-wrapper .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; }
+      #searchInput { width: 100%; padding: 12px 20px 12px 45px; font-size: 15px; margin: 0; background-color: #fff; }
+      .table-wrapper { width: 100%; overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 15px; text-align: left; white-space: nowrap; }
+      thead { background-color: #f9fafb; }
+      th { font-weight: 600; color: #555; font-size: 14px; text-transform: uppercase; }
+      tbody tr { border-bottom: 1px solid #f0f0f0; }
+      tbody tr:last-child { border-bottom: none; }
+      tbody tr:hover { background-color: #f5f3ff; }
+      .actions-cell button { background: none; box-shadow: none; padding: 5px 8px; margin: 0 4px; font-size: 16px; width: auto; border-radius: 5px; }
+      .edit-btn { color: #667eea; }
+      .delete-btn { color: #f44336; }
+      .edit-btn:hover { background-color: rgba(102, 126, 234, 0.1); }
+      .delete-btn:hover { background-color: rgba(244, 67, 54, 0.1); }
+
+      /* Estilos do Modal */
+      .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+      .modal-content { background-color: #fff; border-radius: 15px; width: 100%; max-width: 500px; animation: fadeIn 0.3s; }
+      .modal-header { padding: 20px 30px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+      .modal-header h2 { text-align: left; }
+      .close-btn { font-size: 24px; color: #aaa; cursor: pointer; background: none; border: none; padding: 0; width: auto; margin: 0; box-shadow: none; }
+      .modal-body { padding: 30px; }
+      .modal-body .input-wrapper input { background-color: #fff; }
+      .modal-footer { padding: 20px 30px; border-top: 1px solid #e0e0e0; display: flex; justify-content: flex-end; }
+      .modal-footer button { width: auto; margin: 0 0 0 10px; padding: 10px 25px; font-size: 15px; }
+      #cancelBtn { background: #f0f0f0; color: #555; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="container" id="loginPage">
+      <h1>Bem-vindo</h1>
+      <p class="subtitle">Faça login para continuar</p>
+      <form id="loginForm" novalidate>
+        <div class="input-wrapper"><i class="icon fa-regular fa-envelope"></i><input type="email" id="loginEmail" placeholder="Email" required></div>
+        <div class="input-wrapper"><i class="icon fa-solid fa-lock"></i><input type="password" id="loginPassword" placeholder="Senha" required><i class="eye-icon fa-solid fa-eye-slash" id="toggleLoginPassword"></i></div>
+        <button type="submit">Entrar</button>
+      </form>
+      <div class="links"><a href="javascript:void(0)" onclick="showPage('forgotPasswordPage')">Esqueceu sua senha?</a><span>|</span><a href="javascript:void(0)" onclick="showPage('registerPage')">Cadastre-se</a></div>
+    </div>
+    
+    <div class="container" id="forgotPasswordPage" style="display: none;">
+      <h1>Recuperar Senha</h1>
+      <p class="subtitle">Insira seu e-mail de recuperação.</p>
+      <form id="forgotPasswordForm" novalidate><div class="input-wrapper"><i class="icon fa-regular fa-envelope"></i><input type="email" id="recoveryEmail" placeholder="Digite seu email" required></div><div class="error-message" id="recoveryEmailError">Email inválido</div><button type="submit">Enviar</button></form>
+      <div class="links"><a href="javascript:void(0)" onclick="showPage('loginPage')">Voltar ao login</a></div>
+    </div>
+
+    <div class="container" id="registerPage" style="display: none;">
+      <h1>Crie sua Conta</h1>
+      <p class="subtitle">É rápido e fácil.</p>
+      <form id="registerForm" novalidate>
+        <div class="input-wrapper"><i class="icon fa-regular fa-user"></i><input type="text" id="fullName" placeholder="Nome completo" required></div>
+        <div class="error-message" id="nameError">O nome deve ter ao menos 3 caracteres</div>
+        <div class="input-wrapper"><i class="icon fa-regular fa-envelope"></i><input type="email" id="email" placeholder="Email" required></div>
+        <div class="error-message" id="emailError">Formato de e-mail inválido (ex: nome@dominio.com)</div>
+        <div class="input-wrapper"><i class="icon fa-solid fa-lock"></i><input type="password" id="password" placeholder="Senha" required><i class="eye-icon fa-solid fa-eye-slash" id="toggleRegisterPassword"></i></div>
+        <div class="password-requirements">
+          <ul><li id="lengthCheck">Mínimo de 8 caracteres</li><li id="upperCheck">Uma letra maiúscula</li><li id="numberCheck">Um número</li><li id="specialCheck">Um caractere especial</li></ul>
+        </div>
+        <div class="input-wrapper"><i class="icon fa-solid fa-lock"></i><input type="password" id="confirmPassword" placeholder="Confirme a senha" required><i class="eye-icon fa-solid fa-eye-slash" id="toggleConfirmPassword"></i></div>
+        <div class="error-message" id="passwordError">As senhas não coincidem</div>
+        <button type="submit">Criar conta</button>
+      </form>
+      <div class="links"><a href="javascript:void(0)" onclick="showPage('loginPage')">Já tem uma conta?</a></div>
+    </div>
+
+    <div class="container" id="resetPasswordPage" style="display: none;">
+      <h1>Alterar Senha</h1>
+      <p class="subtitle">Crie uma nova senha para sua conta.</p>
+      <form id="resetPasswordForm" novalidate>
+        <div class="input-wrapper"><i class="icon fa-solid fa-lock"></i><input type="password" id="newPassword" placeholder="Nova senha" required><i class="eye-icon fa-solid fa-eye-slash" id="toggleNewPassword"></i></div>
+        <div class="password-requirements">
+          <ul><li id="newLengthCheck">Mínimo de 8 caracteres</li><li id="newUpperCheck">Uma letra maiúscula</li><li id="newNumberCheck">Um número</li><li id="newSpecialCheck">Um caractere especial</li></ul>
+        </div>
+        <div class="input-wrapper"><i class="icon fa-solid fa-lock"></i><input type="password" id="confirmNewPassword" placeholder="Confirme a nova senha" required><i class="eye-icon fa-solid fa-eye-slash" id="toggleConfirmNewPassword"></i></div>
+        <div class="error-message" id="resetPasswordError">As senhas não coincidem</div>
+        <button type="submit">Salvar nova senha</button>
+      </form>
+      <div class="links"><a href="javascript:void(0)" onclick="showPage('loginPage')">Voltar ao login</a></div>
+    </div>
+</div>
+
+<div id="productManagementPage">
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Gestão de Produtos</h1>
+            <button id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+        </header>
+        <main class="app-main">
+            <div class="toolbar">
+                <div class="search-wrapper">
+                    <i class="icon fa-solid fa-magnifying-glass"></i>
+                    <input type="search" id="searchInput" placeholder="Buscar por nome ou categoria...">
+                </div>
+                <button id="addProductBtn"><i class="fa-solid fa-plus"></i> Adicionar Produto</button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr>
+                    </thead>
+                    <tbody id="productTableBody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Adicionar Produto</h2>
+            <button class="close-btn">&times;</button>
+        </div>
+        <form id="productForm">
+            <div class="modal-body">
+                <input type="hidden" id="productId">
+                <div class="input-wrapper"><i class="icon fa-solid fa-box"></i><input type="text" id="productName" placeholder="Nome do Produto" required></div>
+                <div class="input-wrapper"><i class="icon fa-solid fa-tag"></i><input type="text" id="productCategory" placeholder="Categoria" required></div>
+                <div class="input-wrapper"><i class="icon fa-solid fa-dollar-sign"></i><input type="number" id="productPrice" placeholder="Preço" step="0.01" min="0" required></div>
+                <div class="input-wrapper"><i class="icon fa-solid fa-cubes"></i><input type="number" id="productStock" placeholder="Estoque" min="0" required></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelBtn">Cancelar</button>
+                <button type="submit">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// --- Bloco de Script Completo e Funcional ---
+const loginWrapper = document.querySelector('.login-wrapper');
+const productManagementPage = document.getElementById('productManagementPage');
+
+// --- LÓGICA DAS TELAS DE LOGIN ---
+function showPage(pageId) {
+    document.querySelectorAll('.login-wrapper .container').forEach(c => c.style.display = 'none');
+    document.getElementById(pageId).style.display = 'block';
+}
+
+function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase()); }
+
+function validatePassword(password, type = '') {
+  const checks = { length: password.length >= 8, upper: /[A-Z]/.test(password), number: /[0-9]/.test(password), special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password) };
+  const updateCheck = (id, isValid) => { const el = document.getElementById(`${type}${id}`); if(!el) return; if(password.length === 0){ el.classList.remove('valid','invalid');} else {el.classList.toggle('valid',isValid); el.classList.toggle('invalid',!isValid);}};
+  updateCheck('LengthCheck', checks.length); updateCheck('UpperCheck', checks.upper); updateCheck('NumberCheck', checks.number); updateCheck('SpecialCheck', checks.special);
+  return Object.values(checks).every(Boolean);
+}
+
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value;
+  const pass = document.getElementById('loginPassword').value;
+
+  if (email.trim() === '' || pass.trim() === '') {
+    Swal.fire({ icon: 'warning', title: 'Atenção!', text: 'Por favor, preencha todos os campos.' }); return;
+  }
+  if (email === 'admin@admin.com' && pass === '1234') {
+    Swal.fire({ title: 'Sucesso!', text: 'Login bem-sucedido!', icon: 'success', timer: 1500, showConfirmButton: false })
+    .then(() => {
+        loginWrapper.style.display = 'none';
+        productManagementPage.style.display = 'block';
+        document.body.classList.add('app-mode');
+        renderTable(products);
+    });
+  } else {
+    Swal.fire({ title: 'Erro!', text: 'Email ou senha inválidos.', icon: 'error', confirmButtonText: 'Tentar Novamente' });
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    loginWrapper.style.display = 'flex';
+    productManagementPage.style.display = 'none';
+    document.body.classList.remove('app-mode');
+    document.getElementById('loginForm').reset();
+    showPage('loginPage');
+});
+
+// Listener de todos os formulários e interações de login/cadastro
+// (Este bloco contém o restante da lógica que já funcionava)
+function setupPasswordToggle(inputId, toggleId) {
+    const passwordInput = document.getElementById(inputId); const toggleIcon = document.getElementById(toggleId);
+    toggleIcon.addEventListener('click', function() { const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password'; passwordInput.setAttribute('type', type); this.classList.toggle('fa-eye-slash'); this.classList.toggle('fa-eye'); });
+}
+setupPasswordToggle('loginPassword', 'toggleLoginPassword');
+
+function setupSyncedToggles(passId1, passId2, toggleId1, toggleId2) {
+  const pass1 = document.getElementById(passId1); const pass2 = document.getElementById(passId2); const toggles = [document.getElementById(toggleId1), document.getElementById(toggleId2)];
+  toggles.forEach(toggle => { toggle.addEventListener('click', () => { const newType = pass1.getAttribute('type') === 'password' ? 'text' : 'password'; pass1.setAttribute('type', newType); pass2.setAttribute('type', newType); toggles.forEach(icon => { icon.classList.toggle('fa-eye-slash'); icon.classList.toggle('fa-eye'); }); }); });
+}
+setupSyncedToggles('password', 'confirmPassword', 'toggleRegisterPassword', 'toggleConfirmPassword');
+setupSyncedToggles('newPassword', 'confirmNewPassword', 'toggleNewPassword', 'toggleConfirmNewPassword');
+
+document.getElementById('password').addEventListener('input', function() { validatePassword(this.value, ''); });
+document.getElementById('newPassword').addEventListener('input', function() { validatePassword(this.value, 'new'); });
+
+document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+  e.preventDefault(); const email = document.getElementById('recoveryEmail').value; const errorElement = document.getElementById('recoveryEmailError');
+  if (!validateEmail(email)) { errorElement.style.display = 'block'; return; }
+  errorElement.style.display = 'none';
+  Swal.fire({ title: 'Enviado!', text: 'Se o e-mail estiver cadastrado, você receberá as instruções.', icon: 'success', timer: 2000, showConfirmButton: false }).then(() => { setTimeout(() => { showPage('resetPasswordPage'); }, 200); });
+});
+
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const isNameValid = document.getElementById('fullName').value.length >= 3;
+    const isEmailValid = validateEmail(document.getElementById('email').value);
+    const password = document.getElementById('password').value;
+    const isPasswordStrong = validatePassword(password);
+    const doPasswordsMatch = password === document.getElementById('confirmPassword').value;
+    if (isNameValid && isEmailValid && isPasswordStrong && doPasswordsMatch) {
+      Swal.fire('Sucesso!', 'Conta criada com sucesso!', 'success').then(() => { showPage('loginPage'); e.target.reset(); validatePassword(''); });
+    } else {
+      Swal.fire({ icon: 'error', title: 'Oops...', text: 'Por favor, corrija os campos com erro antes de continuar.' });
+    }
+});
+
+document.getElementById('resetPasswordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const newPassword = document.getElementById('newPassword').value;
+    const isPasswordStrong = validatePassword(newPassword, 'new');
+    const doPasswordsMatch = newPassword === document.getElementById('confirmNewPassword').value;
+    if (newPassword.trim() === '') { Swal.fire({ icon: 'warning', text: 'Por favor, preencha todos os campos.'}); return;}
+    if(isPasswordStrong && doPasswordsMatch) {
+      Swal.fire('Sucesso!', 'Sua senha foi alterada!', 'success').then(() => { showPage('loginPage'); e.target.reset(); validatePassword('', 'new'); });
+    } else {
+      Swal.fire({ icon: 'error', title: 'Oops...', text: 'Por favor, corrija os campos com erro antes de continuar.' });
+    }
+});
+
+
+// --- LÓGICA DA APLICAÇÃO DE GESTÃO DE PRODUTOS ---
+let products = [
+    { id: 1, name: 'Notebook Pro X', category: 'Eletrônicos', price: 7500.00, stock: 15 },
+    { id: 2, name: 'Smartphone Z10', category: 'Eletrônicos', price: 3200.50, stock: 30 },
+    { id: 3, name: 'Cadeira Gamer Ergo', category: 'Móveis', price: 1800.00, stock: 10 },
+    { id: 4, name: 'Teclado Mecânico RGB', category: 'Acessórios', price: 450.75, stock: 50 }
+];
+let editingProductId = null;
+
+const productModal = document.getElementById('productModal');
+const productForm = document.getElementById('productForm');
+const modalTitle = document.getElementById('modalTitle');
+const tableBody = document.getElementById('productTableBody');
+
+function renderTable(productsToRender) {
+    tableBody.innerHTML = '';
+    const productsToShow = productsToRender || products;
+    if (productsToShow.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Nenhum produto encontrado.</td></tr>`;
+        return;
+    }
+    productsToShow.forEach(product => {
+        const row = document.createElement('tr');
+        row.dataset.id = product.id;
+        row.innerHTML = `<td>#${product.id}</td><td>${product.name}</td><td>${product.category}</td><td>R$ ${product.price.toFixed(2).replace('.', ',')}</td><td>${product.stock}</td><td class="actions-cell"><button class="edit-btn"><i class="fa-solid fa-pencil"></i></button><button class="delete-btn"><i class="fa-solid fa-trash"></i></button></td>`;
+        tableBody.appendChild(row);
+    });
+}
+
+function openModal(productId = null) {
+    productForm.reset();
+    editingProductId = productId;
+    if (editingProductId) {
+        modalTitle.textContent = 'Editar Produto';
+        const product = products.find(p => p.id == editingProductId);
+        document.getElementById('productId').value = product.id;
+        document.getElementById('productName').value = product.name;
+        document.getElementById('productCategory').value = product.category;
+        document.getElementById('productPrice').value = product.price;
+        document.getElementById('productStock').value = product.stock;
+    } else {
+        modalTitle.textContent = 'Adicionar Produto';
+    }
+    productModal.style.display = 'flex';
+}
+
+function closeModal() {
+    productModal.style.display = 'none';
+}
+
+function handleFormSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('productName').value;
+    const price = document.getElementById('productPrice').value;
+    if (name.trim() === '' || price.trim() === '') {
+        Swal.fire({icon: 'error', title: 'Campos obrigatórios', text: 'Nome e Preço do produto são obrigatórios.'});
+        return;
+    }
+    const productData = {
+        id: document.getElementById('productId').value,
+        name,
+        category: document.getElementById('productCategory').value,
+        price: parseFloat(price) || 0,
+        stock: parseInt(document.getElementById('productStock').value) || 0
+    };
+    if (editingProductId) {
+        products = products.map(p => p.id == editingProductId ? { ...p, ...productData } : p);
+    } else {
+        productData.id = Date.now();
+        products.push(productData);
+    }
+    renderTable();
+    closeModal();
+    Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Produto salvo com sucesso.', timer: 1500, showConfirmButton: false });
+}
+
+function handleDelete(productId) {
+    Swal.fire({
+        title: 'Você tem certeza?', text: "Esta ação não pode ser desfeita!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sim, deletar!', cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            products = products.filter(p => p.id != productId);
+            renderTable();
+            Swal.fire('Deletado!', 'O produto foi removido.', 'success');
+        }
+    });
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm) || p.category.toLowerCase().includes(searchTerm));
+    renderTable(filteredProducts);
+});
+
+tableBody.addEventListener('click', function(e) {
+    const editBtn = e.target.closest('.edit-btn');
+    const deleteBtn = e.target.closest('.delete-btn');
+    if (editBtn) openModal(editBtn.closest('tr').dataset.id);
+    if (deleteBtn) handleDelete(deleteBtn.closest('tr').dataset.id);
+});
+
+document.getElementById('addProductBtn').addEventListener('click', () => openModal());
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+document.querySelector('.close-btn').addEventListener('click', closeModal);
+productForm.addEventListener('submit', handleFormSubmit);
+window.addEventListener('click', (e) => { if (e.target == productModal) closeModal(); });
+
+</script>
+</body>
+</html>
